@@ -2,9 +2,6 @@ import matplotlib.pyplot as plt
 from numpy import zeros, array
 from scipy.optimize import newton
 
-# =====================================================================
-# DEFINICIÓN DE LOS MÉTODOS INTEGRADORES (FUNCIONES REUTILIZABLES)
-# =====================================================================
 
 def euler(F, U, At, t):
 
@@ -32,14 +29,7 @@ def euler_inverso(F, U0, At, N, max_iter=10):
     return U
 
 def cauchy_problem(F, U0, t, scheme):
-    """Integración numérica por el Método de Euler Explícito.
-    
-    Argumentos:
-      F  : Función que define el sistema diferencial dU/dt = F(U)
-      U0 : Array con las condiciones iniciales
-      t : time domain (vector)
-      scheme: esquema temporal 
-    """
+
     Nv = len(U0)
     N = len(t) - 1
     U = zeros((N+1, Nv))
@@ -50,27 +40,6 @@ def cauchy_problem(F, U0, t, scheme):
       
     return U
 
-
-def euler_inverso(F, U0, At, N, max_iter=10):
-    """Método de Euler Inverso / Implícito (Avance con derivada en t_{n+1}).
-    
-    Ecuación: U_{n+1} = U_n + Δt * F(U_{n+1})
-    """
-    Nv = len(U0)
-    U = zeros((N + 1, Nv))
-    U[0, :] = U0
-    
-    for n in range(N):
-        # Predicción inicial usando Euler explícito
-        U_next = U[n, :] + At * F(U[n, :])
-        
-        # Punto fijo para resolver la ecuación implícita
-        for _ in range(max_iter):
-            U_next = U[n, :] + At * F(U_next)
-            
-        U[n+1, :] = U_next
-        
-    return U
 
 
 def crank_nicholson(F, U, At, t):
@@ -83,7 +52,6 @@ def crank_nicholson(F, U, At, t):
 
 
 def rk4(F, U, At, t):
-    """Integración numérica por el Método de Runge-Kutta de 4º Orden."""
    
     k1 = F(U, t)
     k2 = F(U + At * k1 / 2, t + At / 2)
