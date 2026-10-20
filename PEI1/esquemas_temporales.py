@@ -46,3 +46,41 @@ def partition(a,b,N):
     return array([a + i*(b-a)/N for i in range( 0, N+1)])
 
 
+def calcular_deriva(U_simulado, funcion_invariante, parametros_fisicos):
+    """
+    Calcula la deriva numérica (error absoluto) de cualquier invariante físico.
+    """
+    # 1. El valor exacto de referencia es el del instante inicial (t=0)
+    estado_inicial = U_simulado[0, :]
+    valor_referencia = funcion_invariante(estado_inicial, parametros_fisicos)
+    
+    # 2. Inicializamos el vector de deriva
+    num_pasos = len(U_simulado)
+    deriva = np.zeros(num_pasos)
+    
+    # 3. Calculamos la diferencia absoluta en cada paso
+    for i in range(num_pasos):
+        valor_actual = funcion_invariante(U_simulado[i, :], parametros_fisicos)
+        deriva[i] = abs(valor_actual - valor_referencia)
+        
+    return deriva
+
+import numpy as np
+
+def generar_malla_elipsoide(a, b, c, num_puntos=50):
+    """
+    Función puramente matemática/geométrica.
+    Genera la malla 3D de un elipsoide genérico dados sus tres semiejes (a, b, c).
+    """
+    u = np.linspace(0, 2 * np.pi, num_puntos)
+    v = np.linspace(0, np.pi, num_puntos)
+    U, V = np.meshgrid(u, v)
+    
+    # Parametrización estándar del elipsoide
+    X = a * np.cos(U) * np.sin(V)
+    Y = b * np.sin(U) * np.sin(V)
+    Z = c * np.cos(V)
+    
+    return X, Y, Z
+
+

@@ -1,8 +1,12 @@
 import esquemas_temporales as et
 import fisica as f
 import matplotlib.pyplot as plt
+from gui_simple import lanzar_gui
 
-# Definición de la función de física cambiando el orden a (omega, t, I)
+if __name__ == "__main__":
+    lanzar_gui()
+
+'''# Definición de la función de física cambiando el orden a (omega, t, I)
 def f_sistema(omega, t):
     return f.euler_equations(omega, I, t)
 
@@ -34,6 +38,6 @@ plt.title("Método de RK4")
 plt.axis('equal')
 plt.grid(True)
 plt.show()
-
+'''
 
 
