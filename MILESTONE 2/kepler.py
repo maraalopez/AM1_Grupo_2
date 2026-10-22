@@ -23,25 +23,20 @@ N = 10000
 # 3. Llamadas a los métodos
 t = linspace(0, N * At, N + 1)
 U_e = cauchy(F_kepler, U0, t,  euler)
-# U_inv = cauchy(F_kepler, U0, t, euler_inverso)
-# U_cn = cauchy(F_kepler, U0, t, crank_nicholson)
+U_inv = cauchy(F_kepler, U0, t, euler_inverso)
+U_cn = cauchy(F_kepler, U0, t, crank_nicholson)
 U_rk = cauchy(F_kepler, U0, t, rk4)
 
 # 4. Representación gráfica de las órbitas
-plt.figure(figsize=(7, 7))
 
-plt.plot(U_e[:, 0], U_e[:, 1], 'r--', label='Euler')
-# plt.plot(U_inv[:, 0], U_inv[:, 1], 'k', label='Euler inverso')
-# plt.plot(U_cn[:, 0], U_cn[:, 1], 'g-', label='Crank-Nicolson')
-plt.plot(U_rk[:, 0], U_rk[:, 1], 'b:', label='RK4')
 
-# Posición del Sol
-plt.plot(0, 0, 'yo', markersize=10, label='Sol')
-
-plt.axis('equal')
-plt.grid(True)
-plt.legend()
-plt.xlabel('x')
-plt.ylabel('y')
-plt.title('Comparación de métodos: movimiento de Kepler')
+fig, axes = plt.subplots(2, 2, figsize=(10, 10))
+for ax, U, nombre in zip(axes.flat, [U_e, U_inv, U_cn, U_rk],
+                         ['Euler', 'Euler inverso', 'Crank-Nicolson', 'RK4']):
+    ax.plot(U[:, 0], U[:, 1])
+    ax.plot(0, 0, 'yo')
+    ax.set_title(nombre)
+    ax.axis('equal')
+    ax.grid(True)
+plt.tight_layout()
 plt.show()

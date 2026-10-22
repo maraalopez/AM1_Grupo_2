@@ -1,31 +1,37 @@
 
 import matplotlib.pyplot as plt
-from numpy import zeros, array
-from esquemas_matematicos import euler, crank_nicholson, rk4, euler_inverso
+from numpy import zeros, array, linspace
+from esquemas_matematicos import euler, crank_nicholson, rk4, euler_inverso, cauchy
 
 # 1. Definimos el oscilador
-def F_oscilador(U):
+def F_oscilador(U, t=None):         
     return array([U[1], -U[0]])
-
 # 2. Configuración de parámetros
 U0 = array([1.0, 0.0])  # Condición inicial
 At = 0.1                # Paso de tiempo
 N = 1000                # Pasos totales
 
 # 3. Llamadas a los métodos
-U_e = euler(F_oscilador, U0, At, N)
-U_inv = euler_inverso(F_oscilador, U0, At, N)
-U_cn = crank_nicholson(F_oscilador, U0, At, N)
-U_rk = rk4(F_oscilador, U0, At, N)
+t = linspace(0, N * At, N + 1)
+
+U_e = cauchy(F_oscilador, U0, t, euler)
+U_inv = cauchy(F_oscilador, U0, t, euler_inverso)
+U_cn = cauchy(F_oscilador, U0, t, crank_nicholson)
+U_rk = cauchy(F_oscilador, U0, t, rk4)
 
 # 4. Representación gráfica
-plt.figure(figsize=(7, 7))
-plt.plot(U_e[:, 0], U_e[:, 1], 'r--', label='Euler')
-plt.plot(U_inv[:, 0], U_inv[:, 1], 'k', label='Euler Inverso')
-plt.plot(U_cn[:, 0], U_cn[:, 1], 'g-', label='Crank-Nicolson')
-plt.plot(U_rk[:, 0], U_rk[:, 1], 'b:', label='RK4')
-plt.axis('equal')
-plt.grid(True)
-plt.legend()
-plt.title("Comparación de Métodos de Integración Numérica")
+fig, axes = plt.subplots(2, 2, figsize=(10, 10))
+resultados = [U_e, U_inv, U_cn, U_rk]
+nombres = ['Euler', 'Euler inverso', 'Crank-Nicolson', 'RK4']
+ 
+for ax, U, nombre in zip(axes.flat, resultados, nombres):
+        ax.plot(U[:, 0], U[:, 1])
+        ax.set_title(nombre)
+        ax.set_xlabel('x')
+        ax.set_ylabel('v')
+        ax.axis('equal')
+        ax.grid(True)
+ 
+fig.suptitle('Oscilador armónico: comparación de métodos')
+plt.tight_layout()
 plt.show()
