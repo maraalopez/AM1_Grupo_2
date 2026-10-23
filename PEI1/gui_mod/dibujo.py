@@ -34,40 +34,6 @@ def estilo_2d(a, titulo, color):
         borde.set_color('#26324a')
 
 
-"""def dibujar_fases():
-    Espacio de fases: superficies de Poinsot, separatriz y trayectoria.
-    a = ax['fases']
-    elev, azim = a.elev, a.azim            # guardamos la vista para no perderla al borrar
-    a.clear()
-    estilo_3d(a, 'ESPACIO DE FASES  (ω₁, ω₂, ω₃)')
-    I, w0, U = estado['I'], estado['w0'], estado['U']
-
-    T0 = f.invariant_energy(w0, I)
-    L0 = f.invariant_angular_momentum(w0, I)
-    malla_T, malla_L = f.superficies_poinsot(I, T0, L0, num_puntos=NMESH)
-    a.plot_surface(*malla_T, color=ROJO, alpha=0.15, linewidth=0, shade=False)
-    a.plot_wireframe(*malla_L, color=AZUL, alpha=0.35, linewidth=0.5, rstride=2, cstride=2)
-
-    sep = np.asarray(f.calcular_separatriz(I, np.linalg.norm(w0)))
-    a.plot(sep[:, 0], sep[:, 1], sep[:, 2], color=VERDE, lw=2.5, ls='--')
-    a.plot(U[:, 0], U[:, 1], U[:, 2], color='white', alpha=0.3, lw=1)   # trayectoria completa
-
-    # Estos dos se crean vacíos: animar() los irá rellenando
-    estado['recorrido'], = a.plot([], [], [], color='white', lw=2)
-    estado['punto'], = a.plot([], [], [], 'o', color=AMARILLO, ms=8)
-
-    lim = 1.15 * max(np.abs(m).max() for m in (*malla_T, *malla_L))
-    a.set_xlim(-lim, lim); a.set_ylim(-lim, lim); a.set_zlim(-lim, lim)
-    a.set_xlabel('ω₁'); a.set_ylabel('ω₂'); a.set_zlabel('ω₃')
-    a.set_box_aspect((1, 1, 1), zoom=1.15)
-    a.view_init(elev, azim)
-    a.legend(handles=[Line2D([0], [0], color=ROJO, lw=5, alpha=0.5, label='Energía (T)'),
-                      Line2D([0], [0], color=AZUL, lw=2, label='Momento (L)'),
-                      Line2D([0], [0], color=VERDE, lw=2, ls='--', label='Separatriz'),
-                      Line2D([0], [0], color='white', lw=2, label='ω(t)')],
-             loc='upper left', fontsize=7.5, frameon=False)"""
-
-
 def dibujar_fases():
     a = ax['fases']
     elev, azim = a.elev, a.azim
