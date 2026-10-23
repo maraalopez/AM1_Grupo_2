@@ -20,7 +20,7 @@ def exact_sol(t, U0):
 # Condición inicial: x(0) = 1, v(0) = 0
 U0 = np.array([1.0, 0.0])
 t_span = (0.0, 2.0 * np.pi)  # 1 periodo completo
-N_list = [20, 40, 80, 160, 320, 640]
+N_list = [ 2300, 3600, 4000, 4500, 5000, 6000, 7000, 8000, 9000, 9200, 9400, 9800]  # Tamaños de paso para evaluar la convergencia
 
 schemes = {
     'Euler Explícito': (esq.euler, 1),

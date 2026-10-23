@@ -50,9 +50,8 @@ def superficies_poinsot(I, dos_T0, L0_cuadrado, num_puntos=50):
     malla_T = et.generar_malla_elipsoide(a_T, b_T, c_T, num_puntos)
     
     # 2. Elipsoide de MOMENTO ANGULAR
-    # Tu función original devuelve L^2, así que sacamos el módulo L0 primero
     #L0 = np.sqrt(L0_cuadrado)
-    L0 = L0_cuadrado  # Ya es el módulo, no necesitamos la raíz cuadrada
+    L0 = L0_cuadrado
     
     a_L = L0 / I[0]
     b_L = L0 / I[1]
@@ -62,41 +61,7 @@ def superficies_poinsot(I, dos_T0, L0_cuadrado, num_puntos=50):
     
     return malla_T, malla_L
 
-"""def calcular_separatriz(I, Omega_norm, num_pasos=1000):
 
-    Calcula la curva de la separatriz crítica integrando las ecuaciones de Euler
-    desde el punto de silla inestable a lo largo de su autovector principal.
-
-    # 1. El equilibrio inestable es el giro puro en el eje intermedio (I2)
-    w_eq = np.array([0.0, Omega_norm, 0.0])
-    
-    # 2. Calculamos la Jacobiana en ese punto
-    J = jacobian(w_eq, I)
-    
-    # 3. Extraemos autovalores y autovectores
-    autovalores, autovectores = np.linalg.eig(J)
-    
-    # 4. Buscamos el autovalor real positivo (la inestabilidad)
-    idx_positivo = np.argmax(np.real(autovalores))
-    autovector_inestable = np.real(autovectores[:, idx_positivo])
-    
-    # 5. Aplicamos una perturbación infinitesimal en esa dirección
-    epsilon = 1e-4
-    w_inicial = w_eq + epsilon * autovector_inestable
-    
-
-   # 6. Definimos la función auxiliar
-    def f_sistema(w, t_val):
-        return euler_equations(w, I, t_val)
-    
-    # 7. Integramos la trayectoria pasando nuestra función normal
-    # (Usamos RK4 por defecto para garantizar que la separatriz sea suave)
-    t_sep = et.partition(0, 20.0, num_pasos) 
-    trayectoria_separatriz = et.cauchy_problem(F=f_sistema, U0=w_inicial, t=t_sep, scheme=et.rk4)
-    
-    return trayectoria_separatriz"""
-
-# En fisica.py
 def calcular_separatriz(I, Omega_norm, num_pasos=800):
     w_eq = np.array([0.0, Omega_norm, 0.0])
     J = jacobian(w_eq, I)
@@ -126,3 +91,55 @@ def calcular_separatriz(I, Omega_norm, num_pasos=800):
     lazo_B = np.vstack((rama3, rama4[::-1]))
 
     return lazo_A, lazo_B
+
+def orientacion(t, U):
+    """
+    Calcula la evolución de la actitud del satélite (matrices de rotación 3x3).
+    Transfiere la cinemática física a la capa matemática para obtener las 
+    matrices de rotación incrementales.
+    """
+    R = [np.eye(3)]
+    
+    for k in range(len(t) - 1):
+        # 1. Calculamos la velocidad angular media en el intervalo
+        omega_medio = 0.5 * (U[k] + U[k + 1])
+        
+        # 2. Calculamos el vector de desplazamiento angular instantáneo (v = w * dt)
+        dt = t[k + 1] - t[k]
+        vector_giro = omega_medio * dt
+        
+        # 3. matriz exacta de Rodrigues
+        R_incremental = et.rotacion(vector_giro)
+        
+        # 4. Componemos la actitud actualizando la orientación anterior
+        R.append(R[-1] @ R_incremental)
+        
+    return np.array(R)
+
+
+def ejecutar_simulacion(I, w0, dt, esquema_func, TF=20.0):
+    """
+    Motor principal de la simulación. 
+    Totalmente independiente de interfaces gráficas.
+    """
+    t = et.partition(0, TF, int(TF / dt))
+    
+    def F(omega, t_val):
+        return euler_equations(omega, I, t_val)
+        
+    with np.errstate(all='ignore'):
+        U = np.asarray(et.cauchy_problem(F=F, U0=w0, t=t, scheme=esquema_func))
+        dT = np.asarray(et.calcular_deriva(U, invariant_energy, I))
+        dL = np.asarray(et.calcular_deriva(U, invariant_angular_momentum, I))
+        
+    # Recorte (truncamiento) de la simulación si el método diverge
+    valido = np.isfinite(U).all(axis=1)
+    if not valido.all():
+        n = max(int(valido.argmin()), 2)
+        t, U, dT, dL = t[:n], U[:n], dT[:n], dL[:n]
+        
+    # Calculamos la actitud con la función que acabas de mover a física
+    R = orientacion(t, U) 
+    
+    return t, U, dT, dL, R
+
