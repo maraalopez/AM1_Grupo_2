@@ -13,6 +13,33 @@ def euler_equations(omega, I, t):
         
         return domega_dt
 
+def jacobiano(F, I, omega, eps=1e-8):
+    """
+    Calcula la matriz Jacobiana numéricamente dada la función de la EDO (F).
+    Returns:
+    list: Matriz Jacobiana como lista de listas.
+    """
+    n = len(omega)
+    J = np.zeros((n, n), dtype=float)
+    
+    for j in range(n):
+        # Creamos copias del vector de estado para perturbar solo la componente j
+        w_plus = list(omega)
+        w_minus = list(omega)
+        
+        w_plus[j] += eps
+        w_minus[j] -= eps
+        
+        # Evaluamos la EDO en los puntos perturbados
+        f_plus = np.asarray(F(I, w_plus), dtype=float)
+        f_minus = np.asarray(F(I, w_minus), dtype=float)
+        
+        # Columna j del Jacobiano (derivada respecto a w_j)
+        J[:, j] = (f_plus - f_minus) / (2.0 * eps)
+        
+    return J.tolist()
+
+""""
 def jacobian(omega, I):
     # Jacobian matrix of the Euler equations
     J = np.zeros((3, 3))
@@ -24,7 +51,7 @@ def jacobian(omega, I):
     J[2, 1] = (I[0] - I[1]) * omega[0] / I[2]
     
     return J
-
+"""
 
 def invariant_energy(omega, I):
 
