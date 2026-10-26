@@ -13,6 +13,7 @@ def euler_equations(omega, I, t):
         
         return domega_dt
 
+
 def jacobian(F, I, omega, eps=1e-8):
     """
     Calcula la matriz Jacobiana numéricamente dada la función de la EDO (F).
@@ -40,6 +41,7 @@ def jacobian(F, I, omega, eps=1e-8):
     return J.tolist()
 
 """""
+
 def jacobian(omega, I):
     # Jacobian matrix of the Euler equations
     J = np.zeros((3, 3))
@@ -49,9 +51,9 @@ def jacobian(omega, I):
     J[1, 2] = (I[2] - I[0]) * omega[0] / I[1]
     J[2, 0] = (I[0] - I[1]) * omega[1] / I[2]
     J[2, 1] = (I[0] - I[1]) * omega[0] / I[2]
-    
     return J
-"""""
+
+    """""
 
 def invariant_energy(omega, I):
 
@@ -91,7 +93,11 @@ def superficies_poinsot(I, dos_T0, L0_cuadrado, num_puntos=50):
 
 def calcular_separatriz(I, Omega_norm, num_pasos=800):
     w_eq = np.array([0.0, Omega_norm, 0.0])
-    J = jacobian(w_eq, I)
+    
+    def F(omega, t_val):
+        return euler_equations(omega, I, t_val)
+    
+    J = jacobian(F, I, w_eq, eps=1e-8)
     autovalores, autovectores = np.linalg.eig(J)
     
     idx_positivo = np.argmax(np.real(autovalores))
