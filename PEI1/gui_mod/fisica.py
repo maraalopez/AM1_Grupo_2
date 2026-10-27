@@ -150,7 +150,7 @@ def orientacion(t, U):
     return np.array(R)
 
 
-def ejecutar_simulacion(I, w0, dt, esquema_func, TF=20.0):
+def ejecutar_simulacion(I, w0, dt, esquema_func, TF=50.0):
     """
     Motor principal de la simulación. 
     Totalmente independiente de interfaces gráficas.

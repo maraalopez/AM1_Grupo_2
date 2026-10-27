@@ -16,7 +16,7 @@ ROJO, AZUL, VERDE, AMARILLO, ROSA, CIAN = (
 
 ESQUEMAS = {'Euler': et.euler, 'RK4': et.rk4, 'Crank-Nicolson': et.crank_nicholson}
 
-TF = 20.0               # duración de la simulación [s]
+TF = 50.0               # duración de la simulación [s]
 SIM_POR_FRAME = 0.1     # segundos simulados que avanza la animación en cada fotograma
 NMESH = 25              # resolución de las superficies de Poinsot (más baja = más rápido)
 
