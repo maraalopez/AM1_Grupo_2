@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from numpy import zeros, array
-from scipy.optimize import newton
-
+# from scipy.optimize import newton
+from non_linear_solvers import newton
 
 def euler(F, U, At, t):
 
