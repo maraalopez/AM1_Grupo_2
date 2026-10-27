@@ -70,46 +70,42 @@ def semiejes_poinsot(I: List[float], dos_T0: float,
     return np.sqrt(dos_T0 / I), L0 / I
 
 
-def separatriz(I: List[float], dos_T0: float,
-               num_puntos: int = 300) -> Optional[Tuple[np.ndarray, np.ndarray]]:
-    """
-    Separatriz crítica sobre el elipsoide de energía 2T0, calculada de forma
-    analítica (sin integrar nada).
+def separatriz(I: List[float], Omega_norm: float,
+               num_pasos: int = 300) -> Optional[Tuple[np.ndarray, np.ndarray]]:
+    """Calcula los dos lazos de la separatriz para un ``Omega_norm`` dado."""
+    if Omega_norm <= 0:
+        raise ValueError("Omega_norm debe ser positivo.")
+    if num_pasos < 2:
+        raise ValueError("num_pasos debe ser al menos 2.")
 
-    Es la polhodia con L² = 2 I_int T, la que pasa por los dos puntos de silla
-    (rotación pura sobre el eje intermedio, ±Ω_s con Ω_s = sqrt(2T0 / I_int)).
-    Está formada por dos elipses planas contenidas en los planos
-        ω_max = ± k ω_min,     k = sqrt( I_min (I_int - I_min) / (I_max (I_max - I_int)) )
-    y parametrizadas por θ ∈ [0, 2π]:
-        ω_min = A cos θ,   ω_int = Ω_s sin θ,   ω_max = ± C cos θ
-        A = Ω_s sqrt( I_int (I_max - I_int) / (I_min (I_max - I_min)) )
-        C = Ω_s sqrt( I_int (I_int - I_min) / (I_max (I_max - I_min)) )
+    w_eq = np.array([0.0, Omega_norm, 0.0])
+    J = jacobian(w_eq, I)
+    autovalores, autovectores = np.linalg.eig(J)
 
-    Funciona aunque los momentos no estén ordenados (I1 < I2 < I3 no hace falta):
-    se busca qué eje es el intermedio. Si dos momentos son iguales no hay eje
-    intermedio y devuelve None.
-
-    Devuelve (lazo_1, lazo_2), cada uno un array (num_puntos x 3).
-    """
-    I = np.asarray(I, dtype=float)
-    i_min, i_int, i_max = np.argsort(I)
-    Ia, Ib, Ic = I[i_min], I[i_int], I[i_max]
-    if Ib - Ia < 1e-9 * Ic or Ic - Ib < 1e-9 * Ic:
+    idx_positivo = np.argmax(np.real(autovalores))
+    if np.real(autovalores[idx_positivo]) <= 0:
         return None
+    autovector_inestable = np.real(autovectores[:, idx_positivo])
 
-    Omega_s = np.sqrt(dos_T0 / Ib)
-    A = Omega_s * np.sqrt(Ib * (Ic - Ib) / (Ia * (Ic - Ia)))
-    C = Omega_s * np.sqrt(Ib * (Ib - Ia) / (Ic * (Ic - Ia)))
-    theta = np.linspace(0, 2 * np.pi, num_puntos)
+    epsilon = 1e-4
+    t_sep = et.partition(0, 25.0, num_pasos)
 
-    lazos = []
-    for signo in (1, -1):
-        lazo = np.zeros((num_puntos, 3))
-        lazo[:, i_min] = A * np.cos(theta)
-        lazo[:, i_int] = Omega_s * np.sin(theta)
-        lazo[:, i_max] = signo * C * np.cos(theta)
-        lazos.append(lazo)
-    return lazos[0], lazos[1]
+    def f_sistema(w: np.ndarray, t_val: float) -> np.ndarray:
+        return euler_equations(w, I, t_val)
+
+    w_ini = w_eq + epsilon * autovector_inestable
+    sep1 = np.asarray(
+        et.cauchy_problem(F=f_sistema, U0=w_ini, t=t_sep, scheme=et.rk4)
+    )
+
+    rama1 = sep1
+    rama2 = sep1 * np.array([-1, 1, -1])
+    rama3 = sep1 * np.array([1, 1, -1])
+    rama4 = sep1 * np.array([-1, 1, 1])
+
+    lazo_A = np.vstack((rama1, rama2[::-1]))
+    lazo_B = np.vstack((rama3, rama4[::-1]))
+    return lazo_A, lazo_B
 
 def orientacion(t, U):
     """
