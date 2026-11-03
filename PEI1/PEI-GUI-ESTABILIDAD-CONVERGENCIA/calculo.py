@@ -5,7 +5,7 @@ analisis_numerico.py). No dibuja nada.
 """
 import numpy as np
 from typing import List, Tuple
-
+ 
 import fisica as f
 import esquemas_temporales as et
 import analisis_numerico as an
